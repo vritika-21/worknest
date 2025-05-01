@@ -2,6 +2,7 @@ const Attendance = require('../models/Attendance');
 const Leave = require('../models/LeaveRequest');
 const Feedback = require('../models/Feedback');
 const Employee = require('../models/Employee');
+const authController = require('./authController');
 
 exports.checkIn = async (req, res) => {
   const today = new Date().toISOString().split('T')[0];
@@ -30,3 +31,4 @@ exports.submitFeedback = async (req, res) => {
   await Feedback.create({ message: req.body.message });
   res.json({ message: 'Feedback submitted anonymously' });
 };
+

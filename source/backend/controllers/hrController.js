@@ -1,12 +1,28 @@
+const bcrypt = require('bcryptjs');
 const Employee = require('../models/Employee');
+const Leave = require('../models/LeaveRequest');
 const PDFDocument = require('pdfkit');
 
 exports.addEmployee = async (req, res) => {
-  const { emp_name, emp_email, emp_password, emp_department } = req.body;
-  const hashed = await bcrypt.hash(emp_password, 10);
-  const emp = new Employee({ emp_name, emp_email, emp_password: hashed, emp_role: 'employee', emp_department });
-  await emp.save();
-  res.json({ message: 'Employee added' });
+  try {
+    const { emp_name, emp_email, emp_password, emp_department } = req.body;
+    const hashed = await bcrypt.hash(emp_password, 10);
+    const emp = new Employee({
+      emp_name,
+      emp_email,
+      emp_password: hashed,
+      emp_role: 'employee',
+      emp_department,
+      emp_status: 'active',
+      leaveBalance: 12,
+      history: {}
+    });
+    await emp.save();
+    res.status(201).json({ message: 'Employee added', employee: emp });
+  } catch (error) {
+    console.error('Error adding employee:', error);
+    res.status(500).json({ message: 'Failed to add employee' });
+  }
 };
 
 exports.disableEmployee = async (req, res) => {
@@ -35,4 +51,44 @@ exports.generatePayslip = async (req, res) => {
 exports.getHistory = async (req, res) => {
   const emp = await Employee.findById(req.params.id);
   res.json(emp.history);
+};
+
+exports.getAllEmployees = async (req, res) => {
+  try {
+    const employees = await Employee.find();
+    res.json(employees);
+  } catch (error) {
+    console.error('Error fetching employees:', error);
+    res.status(500).json({ message: 'Failed to fetch employees' });
+  }
+};
+
+exports.approveLeave = async (req, res) => {
+  const { leaveRequestId } = req.body;
+  try {
+    const leave = await Leave.findById(leaveRequestId);
+    if (!leave) return res.status(404).json({ message: 'Leave request not found' });
+
+    leave.status = 'approved';
+    await leave.save();
+
+    res.json({ message: 'Leave approved successfully!' });
+  } catch (err) {
+    res.status(500).json({ message: 'Error approving leave' });
+  }
+};
+
+exports.rejectLeave = async (req, res) => {
+  const { leaveRequestId } = req.body;
+  try {
+    const leave = await Leave.findById(leaveRequestId);
+    if (!leave) return res.status(404).json({ message: 'Leave request not found' });
+
+    leave.status = 'rejected';
+    await leave.save();
+
+    res.json({ message: 'Leave rejected successfully!' });
+  } catch (err) {
+    res.status(500).json({ message: 'Error rejecting leave' });
+  }
 };
