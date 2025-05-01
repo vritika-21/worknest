@@ -9,10 +9,17 @@ const hrRoutes = require('./routes/hrRoutes');
 
 const app = express();
 
+// app.use(cors({
+//   origin: true, // Allows all origins (temporary)
+//   credentials: true
+// }));
+// app.options('*', cors());
+
 app.use(cors({
-  origin: 'http://localhost:3000',
+  origin: 'http://localhost:3000', // Explicit frontend URL
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  credentials: true,
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true
 }));
 app.options('*', cors());
 
