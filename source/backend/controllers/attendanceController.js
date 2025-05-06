@@ -7,11 +7,10 @@ exports.checkIn = async (req, res) => {
         const today = new Date();
         today.setHours(0,0,0,0);
 
-        // Check if already checked-in today
         const existingAttendance = await Attendance.findOne({ emp_Id, date: today });
 
         if (existingAttendance) {
-            return res.status(400).json({ message: 'Already checked in today' });
+            return res.status(200).json({ message: 'Already checked in today' });
         }
 
         const attendance = new Attendance({
