@@ -11,8 +11,19 @@ const attendanceRoutes = require('./routes/attendanceRoutes');
 const app = express();
 
 
+const allowedOrigins = [
+  'http://localhost:3000',
+  'https://frontend-worknest.vercel.app'
+];
+
 app.use(cors({
-  origin: 'http://localhost:3000',
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true
